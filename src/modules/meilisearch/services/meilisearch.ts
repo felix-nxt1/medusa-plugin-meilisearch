@@ -11,10 +11,12 @@ export class MeiliSearchService extends SearchUtils.AbstractSearchService {
 
   protected readonly config_: MeilisearchPluginOptions
   protected readonly client_: MeiliSearch
+  private readonly container_: any
 
   constructor(container: any, options: MeilisearchPluginOptions) {
     super(container, options)
 
+    this.container_ = container
     this.config_ = options
 
     if (!options.config?.apiKey) {
@@ -101,12 +103,19 @@ export class MeiliSearchService extends SearchUtils.AbstractSearchService {
     }
 
     if (i18n?.strategy === 'separate-index') {
+      if (!documents?.length) return
       const langIndexKey = this.getLanguageIndexKey(indexKey, language || i18n.defaultLanguage)
       const transformedDocuments = await this.getTransformedDocuments(indexKey, documents, i18nOptions)
-      return this.client_.index(langIndexKey).addDocuments(transformedDocuments, { primaryKey: 'id' })
+      if (!transformedDocuments.length) return
+      const task = await this.client_.index(langIndexKey).addDocuments(transformedDocuments, { primaryKey: 'id' })
+      await this.waitTask(task)
+      return task
     } else {
       const transformedDocuments = await this.getTransformedDocuments(indexKey, documents, i18nOptions)
-      return this.client_.index(indexKey).addDocuments(transformedDocuments, { primaryKey: 'id' })
+      if (!transformedDocuments.length) return
+      const task = await this.client_.index(indexKey).addDocuments(transformedDocuments, { primaryKey: 'id' })
+      await this.waitTask(task)
+      return task
     }
   }
 
@@ -183,14 +192,52 @@ export class MeiliSearchService extends SearchUtils.AbstractSearchService {
 
     switch (indexConfig?.type) {
       case SearchUtils.indexTypes.PRODUCTS:
-        return Promise.all(
-          documents.map(
-            (doc) => indexConfig.transformer?.(doc, transformProduct, { ...options }) ?? transformProduct(doc, options),
-          ),
-        )
+        const aggregated: any[] = []
+        for (const doc of documents) {
+          const resMaybe = indexConfig.transformer?.(doc, transformProduct, { ...options, container: this.container_ }) ?? transformProduct(doc, { ...options, container: this.container_ })
+          const res = await Promise.resolve(resMaybe)
+          if (Array.isArray(res)) {
+            aggregated.push(...res)
+          } else {
+            aggregated.push(res)
+          }
+        }
+        // Sanitize: ensure all values are JSON-serialisable (remove undefined/BigInt etc.)
+        const cleaned = aggregated.map((doc) => JSON.parse(JSON.stringify(doc))).filter(d => d && d.id)
+
+        // DEBUG: log counts if discrepancies arise
+        console.log('Meilisearch transformer counts:', aggregated.length, 'cleaned', cleaned.length)
+        if (cleaned.length === 0) {
+          console.log('Sample aggregated doc without id:', aggregated[0])
+        }
+        return cleaned
 
       default:
         return documents
+    }
+  }
+
+  // Helper to wait for task completion across SDK versions
+  private async waitTask(task: any) {
+    const uid = task?.taskUid ?? task?.uid ?? task?.uidTask
+    if (uid == null) return
+    // v1 has client.getTask or client.tasks.getTask
+    const poll = async () => {
+      let t: any
+      if (typeof (this.client_ as any).getTask === 'function') {
+        t = await (this.client_ as any).getTask(uid)
+      } else if ((this.client_ as any).tasks?.getTask) {
+        t = await (this.client_ as any).tasks.getTask(uid)
+      }
+      return t
+    }
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const current = await poll()
+      if (!current) return
+      if (current.status === 'succeeded') return
+      if (current.status === 'failed') throw new Error(`Meilisearch task ${uid} failed: ${current.error?.message}`)
+      await new Promise(res => setTimeout(res, 50))
     }
   }
 }

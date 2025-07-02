@@ -27,8 +27,8 @@
     "strictNullChecks": true,
     "target": "es2021"
   },
-  "exclude": [".cache", ".medusa/admin", ".medusa/server", "node_modules", "src/admin"],
-  "include": ["**/*", ".medusa/types/*"],
+  "exclude": [".cache", ".medusa/admin", ".medusa/server", "node_modules", "src/admin", "src/scripts"],
+  "include": ["src/**/*", ".medusa/types/*"],
   "ts-node": {
     "swc": true
   }

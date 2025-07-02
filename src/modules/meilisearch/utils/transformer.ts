@@ -5,6 +5,7 @@ import { ProductDTO } from '@medusajs/types'
 export interface TransformOptions extends TranslationOptions {
   i18n?: I18nConfig
   translations?: TranslationMap
+  container?: any
 }
 
 export const transformProduct: DefaultProductTransformer = (product: ProductDTO, options?: TransformOptions) => {
