@@ -1,12 +1,12 @@
 {
-  "name": "@rokmohar/medusa-plugin-meilisearch",
-  "version": "1.2.1-beta.4",
+  "name": "@felix-nxt1/medusa-plugin-meilisearch",
+  "version": "3.0.0",
   "description": "Meilisearch plugin for Medusa 2",
   "author": "Rok Mohar",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rokmohar/medusa-plugin-meilisearch.git"
+    "url": "git+https://github.com/felix-nxt1/medusa-plugin-meilisearch.git"
   },
   "keywords": [
     "plugin",
@@ -85,5 +85,8 @@
   "engines": {
     "node": ">=20"
   },
-  "packageManager": "yarn@1.22.22"
+  "packageManager": "pnpm@9.0.4",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
 }

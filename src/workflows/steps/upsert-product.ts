@@ -7,7 +7,7 @@ type StepInput = {
 }
 
 export const upsertProductStep = createStep('upsert-products', async ({ id }: StepInput, { container }) => {
-  const queryService = container.resolve('query')
+  const queryService: any = container.resolve('query')
   const meilisearchService: MeiliSearchService = container.resolve(MEILISEARCH_MODULE)
 
   const productFields = await meilisearchService.getFieldsForType(SearchUtils.indexTypes.PRODUCTS)

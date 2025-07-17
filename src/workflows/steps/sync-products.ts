@@ -13,9 +13,9 @@ export type StepInput = {
 export const syncProductsStep = createStep(
   'sync-products',
   async ({ filters, limit, offset }: StepInput, { container }) => {
-    const queryService = container.resolve('query')
+    const queryService: any = container.resolve('query')
     const meilisearchService: MeiliSearchService = container.resolve(MEILISEARCH_MODULE)
-    const salesChannelService = container.resolve(Modules.SALES_CHANNEL)
+    const salesChannelService: any = container.resolve(Modules.SALES_CHANNEL)
 
     // Default sales channel ID (same logic as custom script)
     let salesChannelId: string | undefined
