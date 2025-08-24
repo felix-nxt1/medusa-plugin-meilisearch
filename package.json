@@ -34,12 +34,16 @@
   },
   "devDependencies": {
     "@medusajs/admin-sdk": "^2.8.4",
-    "@medusajs/cli": "^2.8.4",
+    "@medusajs/cli": "^2.9.0",
     "@medusajs/framework": "^2.8.4",
     "@medusajs/icons": "^2.8.4",
     "@medusajs/medusa": "^2.8.4",
+    "@medusajs/orchestration": "^2.9.0",
     "@medusajs/test-utils": "^2.8.4",
+    "@medusajs/types": "2.7.1",
     "@medusajs/ui": "^4.0.8",
+    "@medusajs/utils": "2.7.1",
+    "@medusajs/workflows-sdk": "2.7.1",
     "@mikro-orm/cli": "6.4.3",
     "@mikro-orm/core": "6.4.3",
     "@mikro-orm/knex": "6.4.3",
@@ -63,7 +67,8 @@
     "ts-node": "^10.9.2",
     "typescript": "^5",
     "vite": "^5.4.14",
-    "yalc": "^1.0.0-pre.53"
+    "yalc": "^1.0.0-pre.53",
+    "zod": "^3.22.4"
   },
   "peerDependencies": {
     "@medusajs/admin-sdk": "^2.8.4",
