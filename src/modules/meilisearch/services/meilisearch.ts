@@ -205,11 +205,14 @@ export class MeiliSearchService extends SearchUtils.AbstractSearchService {
         // Sanitize: ensure all values are JSON-serialisable (remove undefined/BigInt etc.)
         const cleaned = aggregated.map((doc) => JSON.parse(JSON.stringify(doc))).filter(d => d && d.id)
 
-        // DEBUG: log counts if discrepancies arise
-        console.log('Meilisearch transformer counts:', aggregated.length, 'cleaned', cleaned.length)
-        if (cleaned.length === 0) {
-          console.log('Sample aggregated doc without id:', aggregated[0])
-        }
+        // Use Medusa logger instead of console
+        try {
+          const logger = this.container_.resolve('logger')
+          logger.info(`Meilisearch: prepared ${aggregated.length} docs, cleaned ${cleaned.length} for index "${indexKey}"`)
+          if (cleaned.length === 0 && aggregated.length > 0) {
+            logger.warn(`Meilisearch: first aggregated doc missing id for index "${indexKey}"`)
+          }
+        } catch {}
         return cleaned
 
       default:
